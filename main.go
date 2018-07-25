@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/egansoft/silly/parser"
 	"github.com/egansoft/silly/server"
 )
 
@@ -13,8 +14,13 @@ silly PORT ROUTES
 `
 
 func main() {
-	port, _ := parseArgs()
-	s := server.New(port)
+	port, routesFile := parseArgs()
+	router, err := parser.ParseFile(routesFile)
+	if err != nil {
+		panic(err)
+	}
+
+	s := server.New(port, router)
 	s.Start()
 }
 

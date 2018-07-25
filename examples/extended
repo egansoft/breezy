@@ -1,0 +1,4 @@
+/repeat/[text]  $ echo [text]
+/3rep3eat/[arg1]/uh/[arg2]/hmm $  tail -f logs/[arg1] | grep [arg2]
+/load : static
+/load/my/path/is/long : some/other/relative/path

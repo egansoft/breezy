@@ -1,11 +1,11 @@
-package main
+package utils
 
 import (
 	"bufio"
 	"os"
 )
 
-func readFile(path string) ([]string, error) {
+func ReadFile(path string) ([]string, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err

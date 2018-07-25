@@ -4,15 +4,21 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
+
+	"github.com/egansoft/silly/tree"
 )
 
 type Server struct {
 	httpServer *http.Server
+	router     *tree.Tree
 }
 
-func New(port uint) *Server {
+func New(port uint, router *tree.Tree) *Server {
 	addr := fmt.Sprintf(":%v", port)
-	s := &Server{}
+	s := &Server{
+		router: router,
+	}
 	httpServer := &http.Server{
 		Addr:    addr,
 		Handler: s,
@@ -32,7 +38,18 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, r.URL.Path)
+	fmt.Fprintf(w, "You hit: %s\n\n", r.URL.Path)
+
+	path := getPath(r.URL.Path)
+	match := s.router.Match(path)
+	fmt.Fprintf(w, "Match result:\n%v\n\n", match)
+
+	fmt.Fprintf(w, "Router tree:\n%s\n", s.router.String())
+}
+
+func getPath(url string) []string {
+	url = strings.Trim(url, "/")
+	return strings.Split(url, "/")
 }
 
 func writeError(w http.ResponseWriter, msg string) {
