@@ -3,7 +3,9 @@ package tree
 import (
 	"bytes"
 	"fmt"
-	"regexp"
+
+	"github.com/egansoft/silly/actions"
+	"github.com/egansoft/silly/utils"
 )
 
 type Tree struct {
@@ -14,6 +16,7 @@ type Node struct {
 	Word     string
 	Type     NodeType
 	Payload  *string
+	Action   actions.Action
 	Children []*Node
 }
 
@@ -21,6 +24,7 @@ type Match struct {
 	Vars     []string
 	Residual []string
 	Payload  *string
+	Action   actions.Action
 }
 
 type NodeType uint
@@ -33,8 +37,6 @@ const (
 	FsNode
 )
 
-var varTokenRegexp = regexp.MustCompile(`^\[.+\]$`)
-
 func New() *Tree {
 	root := Node{
 		Type: RootNode,
@@ -44,20 +46,33 @@ func New() *Tree {
 	}
 }
 
-func (t *Tree) InsertCmd(path []string, cmd string) {
+func (t *Tree) InsertCmd(path []string, cmd string) error {
+	action, err := actions.NewCmd(path, cmd)
+	if err != nil {
+		return err
+	}
+
 	u := &Node{
 		Type:    CmdNode,
 		Payload: &cmd,
+		Action:  action,
 	}
 	t.root.insert(path, u)
+	return nil
 }
 
-func (t *Tree) InsertFs(path []string, fs string) {
+func (t *Tree) InsertFs(path []string, fs string) error {
+	action, err := actions.NewFs(fs)
+	if err != nil {
+		return err
+	}
 	u := &Node{
 		Type:    FsNode,
 		Payload: &fs,
+		Action:  action,
 	}
 	t.root.insert(path, u)
+	return nil
 }
 
 func (u *Node) insert(path []string, node *Node) {
@@ -78,7 +93,7 @@ func (u *Node) insert(path []string, node *Node) {
 	connector := &Node{
 		Word: head,
 	}
-	if tokenIsVar(head) {
+	if utils.TokenIsVar(head) {
 		connector.Type = VarNode
 	} else {
 		connector.Type = WordNode
@@ -130,6 +145,7 @@ func (u *Node) match(path []string, vars *[]string) *Match {
 		if len(path) == 0 {
 			return &Match{
 				Payload: u.Payload,
+				Action:  u.Action,
 			}
 		}
 
@@ -137,6 +153,7 @@ func (u *Node) match(path []string, vars *[]string) *Match {
 		if len(*vars) == 0 {
 			return &Match{
 				Payload:  u.Payload,
+				Action:   u.Action,
 				Residual: path,
 			}
 		}
@@ -177,7 +194,8 @@ func (t *Tree) String() string {
 		buffer.WriteString(item.node.String())
 		buffer.WriteString("\n")
 
-		for _, child := range item.node.Children {
+		for i := len(item.node.Children) - 1; i >= 0; i-- {
+			child := item.node.Children[i]
 			next := &dfsItem{
 				node:  child,
 				level: item.level + 1,
@@ -208,9 +226,6 @@ func (m *Match) String() string {
 	if m == nil {
 		return "no match"
 	}
-	return fmt.Sprintf("matched!\npayload=\"%s\"\nvars=%v\nresidual=%v", *m.Payload, m.Vars, m.Residual)
-}
-
-func tokenIsVar(token string) bool {
-	return varTokenRegexp.MatchString(token)
+	return fmt.Sprintf("matched!\npayload=\"%s\"\nvars=%v\nresidual=%v\naction=%v\n", *m.Payload,
+		m.Vars, m.Residual, m.Action)
 }

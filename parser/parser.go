@@ -3,7 +3,6 @@ package parser
 import (
 	"fmt"
 	"regexp"
-	"strings"
 
 	"github.com/egansoft/silly/tree"
 	"github.com/egansoft/silly/utils"
@@ -50,14 +49,12 @@ func parseAndInsertLine(line string, t *tree.Tree) error {
 	if typeToken == cmdToken {
 		path, cmd, err := parseCmd(urlPath, payload)
 		if err == nil {
-			t.InsertCmd(path, cmd)
-			return nil
+			return t.InsertCmd(path, cmd)
 		}
 	} else if typeToken == fsToken {
 		path, fs, err := parseFs(urlPath, payload)
 		if err == nil {
-			t.InsertFs(path, fs)
-			return nil
+			return t.InsertFs(path, fs)
 		}
 	}
 
@@ -65,12 +62,12 @@ func parseAndInsertLine(line string, t *tree.Tree) error {
 }
 
 func parseCmd(urlPathString string, payload string) ([]string, string, error) {
-	urlPath := strings.Split(urlPathString, "/")[1:]
+	urlPath := utils.UrlToPath(urlPathString)
 	return urlPath, payload, nil
 }
 
 func parseFs(urlPathString string, payload string) ([]string, string, error) {
-	urlPath := strings.Split(urlPathString, "/")[1:]
+	urlPath := utils.UrlToPath(urlPathString)
 	return urlPath, payload, nil
 }
 

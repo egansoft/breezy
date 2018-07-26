@@ -3,7 +3,11 @@ package utils
 import (
 	"bufio"
 	"os"
+	"regexp"
+	"strings"
 )
+
+var varTokenRegexp = regexp.MustCompile(`\[\w+\]`)
 
 func ReadFile(path string) ([]string, error) {
 	file, err := os.Open(path)
@@ -22,4 +26,17 @@ func ReadFile(path string) ([]string, error) {
 		return nil, err
 	}
 	return lines, nil
+}
+
+func UrlToPath(url string) []string {
+	url = strings.Trim(url, "/")
+	return strings.Split(url, "/")
+}
+
+func TokenIsVar(token string) bool {
+	return varTokenRegexp.MatchString(token)
+}
+
+func VarsInCmd(cmd string) []string {
+	return varTokenRegexp.FindAllString(cmd, -1)
 }

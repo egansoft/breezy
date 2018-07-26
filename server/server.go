@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
+	"github.com/egansoft/silly/config"
 	"github.com/egansoft/silly/tree"
+	"github.com/egansoft/silly/utils"
 )
 
 type Server struct {
@@ -38,18 +39,24 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "You hit: %s\n\n", r.URL.Path)
+	writeDebug(w, "You hit: %s\n\n", r.URL.Path)
 
-	path := getPath(r.URL.Path)
+	path := utils.UrlToPath(r.URL.Path)
 	match := s.router.Match(path)
-	fmt.Fprintf(w, "Match result:\n%v\n\n", match)
+	writeDebug(w, "Match result:\n%v\n\n", match)
 
-	fmt.Fprintf(w, "Router tree:\n%s\n", s.router.String())
+	writeDebug(w, "Router tree:\n%s\n\n", s.router.String())
+
+	if match != nil && match.Action != nil {
+		writeDebug(w, "Output:\n")
+		match.Action.Handle(w, match.Vars, match.Residual)
+	}
 }
 
-func getPath(url string) []string {
-	url = strings.Trim(url, "/")
-	return strings.Split(url, "/")
+func writeDebug(w http.ResponseWriter, msg string, args ...interface{}) {
+	if config.DebugMode {
+		fmt.Fprintf(w, msg, args...)
+	}
 }
 
 func writeError(w http.ResponseWriter, msg string) {
