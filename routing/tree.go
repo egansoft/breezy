@@ -1,4 +1,4 @@
-package tree
+package routing
 
 import (
 	"bytes"
@@ -8,7 +8,8 @@ import (
 	"github.com/egansoft/silly/utils"
 )
 
-type Tree struct {
+// A router is a tree datastructure over url paths
+type Router struct {
 	root Node
 }
 
@@ -37,16 +38,16 @@ const (
 	FsNode
 )
 
-func New() *Tree {
+func New() *Router {
 	root := Node{
 		Type: RootNode,
 	}
-	return &Tree{
+	return &Router{
 		root: root,
 	}
 }
 
-func (t *Tree) InsertCmd(path []string, cmd string) error {
+func (r *Router) InsertCmd(path []string, cmd string) error {
 	action, err := actions.NewCmd(path, cmd)
 	if err != nil {
 		return err
@@ -57,11 +58,11 @@ func (t *Tree) InsertCmd(path []string, cmd string) error {
 		Payload: &cmd,
 		Action:  action,
 	}
-	t.root.insert(path, u)
+	r.root.insert(path, u)
 	return nil
 }
 
-func (t *Tree) InsertFs(path []string, fs string) error {
+func (r *Router) InsertFs(path []string, fs string) error {
 	action, err := actions.NewFs(fs)
 	if err != nil {
 		return err
@@ -71,7 +72,7 @@ func (t *Tree) InsertFs(path []string, fs string) error {
 		Payload: &fs,
 		Action:  action,
 	}
-	t.root.insert(path, u)
+	r.root.insert(path, u)
 	return nil
 }
 
@@ -102,9 +103,9 @@ func (u *Node) insert(path []string, node *Node) {
 	u.Children = append(u.Children, connector)
 }
 
-func (t *Tree) Match(path []string) *Match {
+func (r *Router) Match(path []string) *Match {
 	vars := &[]string{}
-	match := t.root.match(path, vars)
+	match := r.root.match(path, vars)
 	if match == nil {
 		return nil
 	}
@@ -176,9 +177,9 @@ type dfsItem struct {
 	level int
 }
 
-func (t *Tree) String() string {
+func (r *Router) String() string {
 	starter := &dfsItem{
-		node:  &t.root,
+		node:  &r.root,
 		level: 0,
 	}
 	stack := []*dfsItem{starter}

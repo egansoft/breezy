@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/egansoft/silly/config"
-	"github.com/egansoft/silly/parser"
+	"github.com/egansoft/silly/routing"
 	"github.com/egansoft/silly/server"
 )
 
@@ -20,7 +20,7 @@ func main() {
 		helpAndExit()
 	}
 
-	router, err := parser.ParseFile(routesFile)
+	router, err := routing.ParseFile(routesFile)
 	if err != nil {
 		panic(err)
 	}

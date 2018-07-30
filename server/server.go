@@ -6,16 +6,16 @@ import (
 	"net/http"
 
 	"github.com/egansoft/silly/config"
-	"github.com/egansoft/silly/tree"
+	"github.com/egansoft/silly/routing"
 	"github.com/egansoft/silly/utils"
 )
 
 type Server struct {
 	httpServer *http.Server
-	router     *tree.Tree
+	router     *routing.Router
 }
 
-func New(port uint, router *tree.Tree) *Server {
+func New(port uint, router *routing.Router) *Server {
 	addr := fmt.Sprintf(":%v", port)
 	s := &Server{
 		router: router,

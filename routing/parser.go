@@ -1,10 +1,9 @@
-package parser
+package routing
 
 import (
 	"fmt"
 	"regexp"
 
-	"github.com/egansoft/silly/tree"
 	"github.com/egansoft/silly/utils"
 )
 
@@ -20,23 +19,23 @@ const (
 
 var lineRegexp = regexp.MustCompile(`^((/(\w+|\[\w+\]))+)\s+(\$|:)\s+(.+)$`)
 
-func ParseFile(filepath string) (*tree.Tree, error) {
+func ParseFile(filepath string) (*Router, error) {
 	lines, err := utils.ReadFile(filepath)
 	if err != nil {
 		return nil, err
 	}
 
-	t := tree.New()
+	r := New()
 	for _, line := range lines {
-		err := parseAndInsertLine(line, t)
+		err := parseAndInsertLine(line, r)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return t, nil
+	return r, nil
 }
 
-func parseAndInsertLine(line string, t *tree.Tree) error {
+func parseAndInsertLine(line string, r *Router) error {
 	matches := lineRegexp.FindStringSubmatch(line)
 	if len(matches) != numRegexpGroups {
 		return syntaxError(line)
@@ -46,29 +45,14 @@ func parseAndInsertLine(line string, t *tree.Tree) error {
 	typeToken := matches[typeTokenGroup]
 	payload := matches[payloadGroup]
 
+	path := utils.UrlToPath(urlPath)
 	if typeToken == cmdToken {
-		path, cmd, err := parseCmd(urlPath, payload)
-		if err == nil {
-			return t.InsertCmd(path, cmd)
-		}
+		return r.InsertCmd(path, payload)
 	} else if typeToken == fsToken {
-		path, fs, err := parseFs(urlPath, payload)
-		if err == nil {
-			return t.InsertFs(path, fs)
-		}
+		return r.InsertFs(path, payload)
 	}
 
 	return syntaxError(line)
-}
-
-func parseCmd(urlPathString string, payload string) ([]string, string, error) {
-	urlPath := utils.UrlToPath(urlPathString)
-	return urlPath, payload, nil
-}
-
-func parseFs(urlPathString string, payload string) ([]string, string, error) {
-	urlPath := utils.UrlToPath(urlPathString)
-	return urlPath, payload, nil
 }
 
 func syntaxError(line string) error {
