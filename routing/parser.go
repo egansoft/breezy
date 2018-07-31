@@ -9,7 +9,7 @@ import (
 
 const (
 	numRegexpGroups = 6
-	urlPathGroup    = 1
+	reqUrlGroup     = 1
 	typeTokenGroup  = 4
 	payloadGroup    = 5
 
@@ -41,11 +41,11 @@ func parseAndInsertLine(line string, r *Router) error {
 		return syntaxError(line)
 	}
 
-	urlPath := matches[urlPathGroup]
+	reqUrl := matches[reqUrlGroup]
 	typeToken := matches[typeTokenGroup]
 	payload := matches[payloadGroup]
 
-	path := utils.UrlToPath(urlPath)
+	path := utils.UrlToPath(reqUrl)
 	if typeToken == cmdToken {
 		return r.InsertCmd(path, payload)
 	} else if typeToken == fsToken {

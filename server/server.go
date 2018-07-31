@@ -1,8 +1,11 @@
 package server
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"log"
+	"mime"
 	"net/http"
 
 	"github.com/egansoft/silly/config"
@@ -34,31 +37,47 @@ func (s *Server) Start() {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		writeError(w, "Unsupported method")
-		return
-	}
+	b := &bytes.Buffer{}
 
-	writeDebug(w, "You hit: %s\n\n", r.URL.Path)
+	writeDebug(b, "You hit: %s\n\n", r.URL.Path)
 
 	path := utils.UrlToPath(r.URL.Path)
 	match := s.router.Match(path)
-	writeDebug(w, "Match result:\n%v\n\n", match)
+	writeDebug(b, "Match result:\n%v\n\n", match)
 
-	writeDebug(w, "Router tree:\n%s\n\n", s.router.String())
+	writeDebug(b, "Router tree:\n%s\n\n", s.router.String())
 
-	if match != nil && match.Action != nil {
-		writeDebug(w, "Output:\n")
-		match.Action.Handle(w, match.Vars, match.Residual)
+	if match == nil || match.Action == nil {
+		fmt.Fprintf(b, "Page not found")
+		writeResponse(w, b, http.StatusNotFound)
+		return
 	}
+
+	ctype := mime.TypeByExtension(r.URL.Path)
+	if ctype != "" {
+		w.Header().Set("Content-Type", ctype)
+	}
+
+	writeDebug(b, "Output:\n")
+	status, err := match.Action.Handle(b, match.Vars, match.Residual)
+	if err != nil {
+		log.Println(err)
+	}
+
+	writeResponse(w, b, status)
 }
 
-func writeDebug(w http.ResponseWriter, msg string, args ...interface{}) {
+func writeResponse(w http.ResponseWriter, b *bytes.Buffer, status int) {
+	contentLen, err := b.WriteTo(w)
+	if err != nil {
+		return
+	}
+
+	w.Header().Set("Content-Length", fmt.Sprintf("%v", contentLen))
+}
+
+func writeDebug(w io.Writer, msg string, args ...interface{}) {
 	if config.DebugMode {
 		fmt.Fprintf(w, msg, args...)
 	}
-}
-
-func writeError(w http.ResponseWriter, msg string) {
-
 }

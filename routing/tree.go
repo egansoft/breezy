@@ -67,6 +67,7 @@ func (r *Router) InsertFs(path []string, fs string) error {
 	if err != nil {
 		return err
 	}
+
 	u := &Node{
 		Type:    FsNode,
 		Payload: &fs,

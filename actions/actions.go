@@ -3,7 +3,6 @@ package actions
 import (
 	"fmt"
 	"io"
-	"mime"
 	"net/http"
 	"os"
 	"os/exec"
@@ -14,7 +13,7 @@ import (
 )
 
 type Action interface {
-	Handle(http.ResponseWriter, []string, []string)
+	Handle(io.Writer, []string, []string) (int, error)
 }
 
 type Cmd struct {
@@ -54,7 +53,7 @@ func NewCmd(urlPath []string, line string) (Action, error) {
 	return cmd, nil
 }
 
-func (c *Cmd) Handle(w http.ResponseWriter, args []string, residual []string) {
+func (c *Cmd) Handle(w io.Writer, args []string, residual []string) (int, error) {
 	bashArgs := []string{"-c", c.script}
 	allArgs := append(bashArgs, args...)
 
@@ -62,8 +61,9 @@ func (c *Cmd) Handle(w http.ResponseWriter, args []string, residual []string) {
 	cmd.Stdout = w
 	err := cmd.Run()
 	if err != nil {
-		fmt.Println(err)
+		return http.StatusInternalServerError, err
 	}
+	return http.StatusOK, nil
 }
 
 func NewFs(root string) (Action, error) {
@@ -73,20 +73,16 @@ func NewFs(root string) (Action, error) {
 	return fs, nil
 }
 
-func (f *Fs) Handle(w http.ResponseWriter, args []string, residual []string) {
+func (f *Fs) Handle(w io.Writer, args []string, residual []string) (int, error) {
 	pathEnd := strings.Join(residual, "/")
 	path := f.root + "/" + pathEnd
 	file, err := os.Open(path)
 	if err != nil {
-		fmt.Println(err)
-		io.WriteString(w, "uh oh")
+		fmt.Fprintf(w, "Page not found")
+		return http.StatusNotFound, nil
 	}
 	defer file.Close()
 
-	ctype := mime.TypeByExtension(path)
-	if ctype != "" {
-		w.Header().Set("Content-Type", ctype)
-	}
-
 	io.Copy(w, file)
+	return http.StatusOK, nil
 }
