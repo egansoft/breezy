@@ -8,8 +8,8 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/egansoft/silly/config"
-	"github.com/egansoft/silly/utils"
+	"github.com/egansoft/breezy/config"
+	"github.com/egansoft/breezy/utils"
 )
 
 type Action interface {

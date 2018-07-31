@@ -8,9 +8,9 @@ import (
 	"mime"
 	"net/http"
 
-	"github.com/egansoft/silly/config"
-	"github.com/egansoft/silly/routing"
-	"github.com/egansoft/silly/utils"
+	"github.com/egansoft/breezy/config"
+	"github.com/egansoft/breezy/routing"
+	"github.com/egansoft/breezy/utils"
 )
 
 type Server struct {

@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/egansoft/silly/config"
-	"github.com/egansoft/silly/routing"
-	"github.com/egansoft/silly/server"
+	"github.com/egansoft/breezy/config"
+	"github.com/egansoft/breezy/routing"
+	"github.com/egansoft/breezy/server"
 )
 
-var helpMsg = `Silly Server
-silly PORT ROUTES
+var helpMsg = `Breezy Server
+breezy PORT ROUTES
 `
 
 func main() {

@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/egansoft/silly/actions"
-	"github.com/egansoft/silly/utils"
+	"github.com/egansoft/breezy/actions"
+	"github.com/egansoft/breezy/utils"
 )
 
 // A router is a tree datastructure over url paths
