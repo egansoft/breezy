@@ -1,2 +1,0 @@
-/hella $ echo hella; sleep 4; echo aww yeah
-/tail $ tail examples/thelog

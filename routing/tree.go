@@ -215,7 +215,7 @@ func (u *Node) String() string {
 	case WordNode:
 		return fmt.Sprintf("/%s", u.Word)
 	case VarNode:
-		return fmt.Sprintf("/[%s]", u.Word)
+		return fmt.Sprintf("/%s", u.Word)
 	case CmdNode:
 		return fmt.Sprintf("$ %s", *u.Payload)
 	case FsNode:

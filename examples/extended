@@ -3,3 +3,4 @@
 /load/my/path/is/long : some/other/relative/path
 /load : examples
 /tell/me/[what] $ echo [what] [what] [what]
+/grep/for/[thing] $ grep [thing]

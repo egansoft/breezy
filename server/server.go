@@ -63,13 +63,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", ctype)
 	}
 
-	status, err := match.Action.Handle(w, match.Vars, match.Residual)
+	status, err := match.Action.Handle(w, r.Body, match.Vars, match.Residual)
 	if err != nil {
 		log.Println(err)
 	}
 
 	if status != http.StatusOK {
-		respondWithError(w, http.StatusNotFound)
+		respondWithError(w, status)
 	}
 }
 

@@ -17,7 +17,7 @@ import (
 // The Handler should either not write to the writer and return an http status
 // code, or write the the writer and return 200.
 type Action interface {
-	Handle(io.Writer, []string, []string) (int, error)
+	Handle(io.Writer, io.Reader, []string, []string) (int, error)
 }
 
 type Cmd struct {
@@ -57,19 +57,23 @@ func NewCmd(urlPath []string, line string) (Action, error) {
 	return cmd, nil
 }
 
-func (c *Cmd) Handle(w io.Writer, args []string, residual []string) (int, error) {
+func (c *Cmd) Handle(w io.Writer, data io.Reader, args []string, residual []string) (int, error) {
 	bashArgs := []string{"-c", c.script}
 	allArgs := append(bashArgs, args...)
-	buf := &bytes.Buffer{}
+
+	inBuf := &bytes.Buffer{}
+	outBuf := &bytes.Buffer{}
+	io.Copy(inBuf, data)
 
 	cmd := exec.Command(config.Shell, allArgs...)
-	cmd.Stdout = buf
+	cmd.Stdin = inBuf
+	cmd.Stdout = outBuf
 	err := cmd.Run()
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
 
-	buf.WriteTo(w)
+	outBuf.WriteTo(w)
 	return http.StatusOK, nil
 }
 
@@ -80,7 +84,7 @@ func NewFs(root string) (Action, error) {
 	return fs, nil
 }
 
-func (f *Fs) Handle(w io.Writer, args []string, residual []string) (int, error) {
+func (f *Fs) Handle(w io.Writer, data io.Reader, args []string, residual []string) (int, error) {
 	pathEnd := strings.Join(residual, "/")
 	path := f.root + "/" + pathEnd
 	file, err := os.Open(path)
