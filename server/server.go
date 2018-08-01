@@ -18,6 +18,11 @@ type Server struct {
 	router     *routing.Router
 }
 
+const (
+	NotFoundResponse            = "Page not found"
+	InternalServerErrorResponse = "Internal server error"
+)
+
 func New(port uint, router *routing.Router) *Server {
 	addr := fmt.Sprintf(":%v", port)
 	s := &Server{
@@ -49,7 +54,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	bufferDebug(debugBuf, "Router tree:\n%s\n\n", s.router.String())
 
 	if match == nil || match.Action == nil {
-		w.WriteHeader(http.StatusNotFound)
+		respondWithError(w, http.StatusNotFound)
 		return
 	}
 
@@ -64,7 +69,18 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if status != http.StatusOK {
-		w.WriteHeader(status)
+		respondWithError(w, http.StatusNotFound)
+	}
+}
+
+func respondWithError(w http.ResponseWriter, status int) {
+	w.WriteHeader(status)
+
+	switch status {
+	case http.StatusNotFound:
+		fmt.Fprintf(w, NotFoundResponse)
+	case http.StatusInternalServerError:
+		fmt.Fprintf(w, InternalServerErrorResponse)
 	}
 }
 

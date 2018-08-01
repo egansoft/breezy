@@ -13,6 +13,9 @@ import (
 	"github.com/egansoft/breezy/utils"
 )
 
+// The Action interface is a wrapper around a handler for incoming requests.
+// The Handler should either not write to the writer and return an http status
+// code, or write the the writer and return 200.
 type Action interface {
 	Handle(io.Writer, []string, []string) (int, error)
 }
