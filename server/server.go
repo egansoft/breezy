@@ -37,19 +37,19 @@ func (s *Server) Start() {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	b := &bytes.Buffer{}
+	debugBuf := &bytes.Buffer{}
+	defer flushDebug(debugBuf, w)
 
-	writeDebug(b, "You hit: %s\n\n", r.URL.Path)
+	bufferDebug(debugBuf, "\nYou hit: %s\n\n", r.URL.Path)
 
 	path := utils.UrlToPath(r.URL.Path)
 	match := s.router.Match(path)
-	writeDebug(b, "Match result:\n%v\n\n", match)
 
-	writeDebug(b, "Router tree:\n%s\n\n", s.router.String())
+	bufferDebug(debugBuf, "Match result:\n%v\n\n", match)
+	bufferDebug(debugBuf, "Router tree:\n%s\n\n", s.router.String())
 
 	if match == nil || match.Action == nil {
-		fmt.Fprintf(b, "Page not found")
-		writeResponse(w, b, http.StatusNotFound)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
@@ -58,26 +58,30 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", ctype)
 	}
 
-	writeDebug(b, "Output:\n")
-	status, err := match.Action.Handle(b, match.Vars, match.Residual)
+	status, err := match.Action.Handle(w, match.Vars, match.Residual)
 	if err != nil {
 		log.Println(err)
 	}
 
-	writeResponse(w, b, status)
+	if status != http.StatusOK {
+		w.WriteHeader(status)
+	}
 }
 
-func writeResponse(w http.ResponseWriter, b *bytes.Buffer, status int) {
-	contentLen, err := b.WriteTo(w)
-	if err != nil {
+func bufferDebug(w io.Writer, msg string, args ...interface{}) {
+	if !config.DebugMode {
+		return
+	}
+	fmt.Fprintf(w, msg, args...)
+}
+
+func flushDebug(b *bytes.Buffer, w io.Writer) {
+	if !config.DebugMode {
 		return
 	}
 
-	w.Header().Set("Content-Length", fmt.Sprintf("%v", contentLen))
-}
-
-func writeDebug(w io.Writer, msg string, args ...interface{}) {
-	if config.DebugMode {
-		fmt.Fprintf(w, msg, args...)
+	_, err := b.WriteTo(w)
+	if err != nil {
+		log.Println(err)
 	}
 }

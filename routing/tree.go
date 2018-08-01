@@ -228,6 +228,6 @@ func (m *Match) String() string {
 	if m == nil {
 		return "no match"
 	}
-	return fmt.Sprintf("matched!\npayload=\"%s\"\nvars=%v\nresidual=%v\naction=%v\n", *m.Payload,
+	return fmt.Sprintf("payload=\"%s\"\nvars=%v\nresidual=%v\naction=%v\n", *m.Payload,
 		m.Vars, m.Residual, m.Action)
 }

@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -56,13 +57,16 @@ func NewCmd(urlPath []string, line string) (Action, error) {
 func (c *Cmd) Handle(w io.Writer, args []string, residual []string) (int, error) {
 	bashArgs := []string{"-c", c.script}
 	allArgs := append(bashArgs, args...)
+	buf := &bytes.Buffer{}
 
 	cmd := exec.Command(config.Shell, allArgs...)
-	cmd.Stdout = w
+	cmd.Stdout = buf
 	err := cmd.Run()
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
+
+	buf.WriteTo(w)
 	return http.StatusOK, nil
 }
 
@@ -78,7 +82,6 @@ func (f *Fs) Handle(w io.Writer, args []string, residual []string) (int, error) 
 	path := f.root + "/" + pathEnd
 	file, err := os.Open(path)
 	if err != nil {
-		fmt.Fprintf(w, "Page not found")
 		return http.StatusNotFound, nil
 	}
 	defer file.Close()
