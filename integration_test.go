@@ -23,7 +23,11 @@ const testRoutes = `
 `
 
 func TestIntegration(t *testing.T) {
-	s := initServer(t, testRoutes)
+	s, err := initServer(testRoutes)
+	if err != nil {
+		t.Fatalf("Couldn't parse routes: %v", err)
+	}
+
 	res, code := hitEndpoint(s, http.MethodGet, "/echo/hello/3x", "")
 	assertEqual(t, code, http.StatusOK)
 	assertEqual(t, res, "hello hello hello")
@@ -49,14 +53,27 @@ func TestIntegration(t *testing.T) {
 	assertEqual(t, code, http.StatusInternalServerError)
 }
 
-func initServer(t *testing.T, routefile string) *server.Server {
+func BenchmarkHandling(b *testing.B) {
+	s, _ := initServer(testRoutes)
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		hitEndpoint(s, http.MethodGet, "/echo/hello/3x", "")
+		hitEndpoint(s, http.MethodPost, "/count/l/grep/y", "y\nn\ny\nn\nn\nn\ny")
+		hitEndpoint(s, http.MethodGet, "/the/static/files/text", "")
+		hitEndpoint(s, http.MethodGet, "/not/a/real/path", "")
+		hitEndpoint(s, http.MethodGet, "/error", "")
+	}
+}
+
+func initServer(routefile string) (*server.Server, error) {
 	routes := strings.Split(routefile, "\n")
 	router, err := routing.Parse(routes)
 	if err != nil {
-		t.Fatalf("Couldn't parse routes: %v", err)
+		return nil, err
 	}
 
-	return server.New(router)
+	return server.New(router), nil
 }
 
 func hitEndpoint(s *server.Server, method, path, data string) (string, int) {
