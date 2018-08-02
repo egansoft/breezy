@@ -1,0 +1,3 @@
+/echo/[msg]/3x               $ echo [msg] [msg] [msg]
+/count/[flag]/grep/[pattern] $ grep [pattern] | wc -[flag]
+/the/static/files            : examples/static

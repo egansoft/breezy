@@ -9,6 +9,7 @@ import (
 	"github.com/egansoft/breezy/config"
 	"github.com/egansoft/breezy/routing"
 	"github.com/egansoft/breezy/server"
+	"github.com/egansoft/breezy/utils"
 )
 
 var helpMsg = `Usage: breezy [OPTIONS] PORT FILE
@@ -33,8 +34,14 @@ Options:
 `
 
 func main() {
-	port, routesFile := parseArgs()
-	router, err := routing.ParseFile(routesFile)
+	port, filename := parseArgs()
+	routes, err := utils.ReadFile(filename)
+	if err != nil {
+		fmt.Println(err)
+		usageAndExit()
+	}
+
+	router, err := routing.Parse(routes)
 	if err != nil {
 		fmt.Println(err)
 		usageAndExit()

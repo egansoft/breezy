@@ -30,24 +30,26 @@ type Fs struct {
 
 func NewCmd(urlPath []string, line string) (Action, error) {
 	varToUrlIndex := make(map[string]int)
-	for i, token := range urlPath {
+	idx := 0
+	for _, token := range urlPath {
 		if _, exists := varToUrlIndex[token]; exists {
 			return nil, fmt.Errorf("Duplicate var defined in %s", line)
 		}
 		if utils.TokenIsVar(token) {
-			varToUrlIndex[token] = i
+			varToUrlIndex[token] = idx
+			idx++
 		}
 	}
 
 	cmdVars := utils.VarsInCmd(line)
 	script := line
-	for i, cmdVar := range cmdVars {
+	for _, cmdVar := range cmdVars {
 		_, exists := varToUrlIndex[cmdVar]
 		if !exists {
 			return nil, fmt.Errorf("Var %s used in %s but not defined in %v", cmdVar, line, urlPath)
 		}
 
-		varArg := fmt.Sprintf("$%v", i)
+		varArg := fmt.Sprintf("$%v", varToUrlIndex[cmdVar])
 		script = strings.Replace(script, cmdVar, varArg, -1)
 	}
 

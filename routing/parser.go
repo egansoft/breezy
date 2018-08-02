@@ -19,12 +19,7 @@ const (
 
 var lineRegexp = regexp.MustCompile(`^((/(\w+|\[\w+\]))+)\s+(\$|:)\s+(.+)$`)
 
-func ParseFile(filepath string) (*Router, error) {
-	lines, err := utils.ReadFile(filepath)
-	if err != nil {
-		return nil, err
-	}
-
+func Parse(lines []string) (*Router, error) {
 	r := New()
 	for _, line := range lines {
 		err := parseAndInsertLine(line, r)
@@ -36,6 +31,10 @@ func ParseFile(filepath string) (*Router, error) {
 }
 
 func parseAndInsertLine(line string, r *Router) error {
+	if len(line) == 0 {
+		return nil
+	}
+
 	matches := lineRegexp.FindStringSubmatch(line)
 	if len(matches) != numRegexpGroups {
 		return syntaxError(line)
