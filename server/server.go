@@ -23,8 +23,8 @@ const (
 	InternalServerErrorResponse = "Internal server error"
 )
 
-func New(port uint, router *routing.Router) *Server {
-	addr := fmt.Sprintf(":%v", port)
+func New(router *routing.Router) *Server {
+	addr := fmt.Sprintf(":%v", config.Port)
 	s := &Server{
 		router: router,
 	}
@@ -37,7 +37,7 @@ func New(port uint, router *routing.Router) *Server {
 }
 
 func (s *Server) Start() {
-	log.Println("Now serving")
+	log.Printf("Now serving on port %v", config.Port)
 	log.Fatal(s.httpServer.ListenAndServe())
 }
 
@@ -47,14 +47,15 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	bufferDebug(debugBuf, "\nYou hit: %s\n\n", r.URL.Path)
 
-	path := utils.UrlToPath(r.URL.Path)
+	url := r.URL.Path
+	path := utils.UrlToPath(url)
 	match := s.router.Match(path)
 
 	bufferDebug(debugBuf, "Match result:\n%v\n\n", match)
 	bufferDebug(debugBuf, "Router tree:\n%s\n\n", s.router.String())
 
 	if match == nil || match.Action == nil {
-		respondWithError(w, http.StatusNotFound)
+		respondWithError(w, http.StatusNotFound, url)
 		return
 	}
 
@@ -65,15 +66,18 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	status, err := match.Action.Handle(w, r.Body, match.Vars, match.Residual)
 	if err != nil {
-		log.Println(err)
+		log.Printf("%v", err)
 	}
 
 	if status != http.StatusOK {
-		respondWithError(w, status)
+		respondWithError(w, status, url)
+		return
 	}
+
+	logResponse(status, url)
 }
 
-func respondWithError(w http.ResponseWriter, status int) {
+func respondWithError(w http.ResponseWriter, status int, url string) {
 	w.WriteHeader(status)
 
 	switch status {
@@ -82,6 +86,7 @@ func respondWithError(w http.ResponseWriter, status int) {
 	case http.StatusInternalServerError:
 		fmt.Fprintf(w, InternalServerErrorResponse)
 	}
+	logResponse(status, url)
 }
 
 func bufferDebug(w io.Writer, msg string, args ...interface{}) {
@@ -100,4 +105,8 @@ func flushDebug(b *bytes.Buffer, w io.Writer) {
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+func logResponse(status int, url string) {
+	log.Printf("%v %s", status, url)
 }

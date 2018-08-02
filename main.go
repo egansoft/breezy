@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strconv"
 
 	"github.com/egansoft/breezy/config"
 	"github.com/egansoft/breezy/routing"
@@ -28,13 +27,14 @@ FILE consists of a newline seperated list of routes, which have the forms:
 If multiple routes match a given url, the first one is used.
 
 Options:
+  -p, --port     specify the port to run on, with 8080 as the default
   -s, --shell    specify a shell to use, with sh as the default
   -d, --debug    enable debug mode
   -h, --help     display this message and exit
 `
 
 func main() {
-	port, filename := parseArgs()
+	filename := parseArgs()
 	routes, err := utils.ReadFile(filename)
 	if err != nil {
 		fmt.Println(err)
@@ -47,11 +47,13 @@ func main() {
 		usageAndExit()
 	}
 
-	s := server.New(port, router)
+	s := server.New(router)
 	s.Start()
 }
 
-func parseArgs() (uint, string) {
+func parseArgs() string {
+	port := flag.Int("port", config.Port, "")
+	flag.IntVar(port, "p", config.Port, "")
 	debug := flag.Bool("debug", config.DebugMode, "")
 	flag.BoolVar(debug, "d", config.DebugMode, "")
 	shell := flag.String("shell", config.Shell, "")
@@ -66,25 +68,18 @@ func parseArgs() (uint, string) {
 		helpAndExit()
 	}
 
+	config.Port = *port
 	config.DebugMode = *debug
 	config.Shell = *shell
 
 	args := flag.Args()
-	if len(args) != 2 {
+	if len(args) != 1 {
 		fmt.Println("Incorrect number of arguments")
 		usageAndExit()
 	}
 
-	portString := flag.Arg(0)
-	portInt, err := strconv.Atoi(portString)
-	if err != nil {
-		fmt.Println("Port argument must be an integer")
-		usageAndExit()
-	}
-	port := uint(portInt)
-
-	routesFile := flag.Arg(1)
-	return port, routesFile
+	routesFile := flag.Arg(0)
+	return routesFile
 }
 
 func helpAndExit() {

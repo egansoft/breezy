@@ -18,6 +18,7 @@ The simplest possible web nano-framework. No code needed.
     If multiple routes match a given url, the first one is used.
 
     Options:
+      -p, --port     specify the port to run on, with 8080 as the default
       -s, --shell    specify a shell to use, with sh as the default
       -d, --debug    enable debug mode
       -h, --help     display this message and exit

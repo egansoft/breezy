@@ -65,14 +65,17 @@ func (c *Cmd) Handle(w io.Writer, data io.Reader, args []string, residual []stri
 
 	inBuf := &bytes.Buffer{}
 	outBuf := &bytes.Buffer{}
+	errBuf := &bytes.Buffer{}
 	io.Copy(inBuf, data)
 
 	cmd := exec.Command(config.Shell, allArgs...)
 	cmd.Stdin = inBuf
 	cmd.Stdout = outBuf
+	cmd.Stderr = errBuf
 	err := cmd.Run()
 	if err != nil {
-		return http.StatusInternalServerError, err
+		fullErr := fmt.Errorf("%v: %s", err, errBuf.String())
+		return http.StatusInternalServerError, fullErr
 	}
 
 	outBuf.WriteTo(w)
