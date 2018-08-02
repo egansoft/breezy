@@ -19,6 +19,7 @@ const testRoutes = `
 /the/static/files            : examples/static
 /the/static/files/ignored    $ echo ignored
 /the/static/files            $ echo ignored
+/error                       $ exit 1
 `
 
 func TestIntegration(t *testing.T) {
@@ -43,6 +44,9 @@ func TestIntegration(t *testing.T) {
 
 	res, code = hitEndpoint(s, http.MethodGet, "/the/static/files/ignored", "")
 	assertEqual(t, code, http.StatusNotFound)
+
+	res, code = hitEndpoint(s, http.MethodGet, "/error", "")
+	assertEqual(t, code, http.StatusInternalServerError)
 }
 
 func initServer(t *testing.T, routefile string) *server.Server {
@@ -52,7 +56,7 @@ func initServer(t *testing.T, routefile string) *server.Server {
 		t.Fatalf("Couldn't parse routes: %v", err)
 	}
 
-	return server.New(0, router)
+	return server.New(router)
 }
 
 func hitEndpoint(s *server.Server, method, path, data string) (string, int) {

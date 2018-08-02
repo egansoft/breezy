@@ -3,6 +3,7 @@ package routing
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/egansoft/breezy/utils"
 )
@@ -31,6 +32,7 @@ func Parse(lines []string) (*Router, error) {
 }
 
 func parseAndInsertLine(line string, r *Router) error {
+	line = strings.TrimSpace(line)
 	if len(line) == 0 {
 		return nil
 	}
