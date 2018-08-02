@@ -17,6 +17,8 @@ const testRoutes = `
 /echo/[msg]/3x               $ echo [msg] [msg] [msg]
 /count/[flag]/grep/[pattern] $ grep [pattern] | wc -[flag]
 /the/static/files            : examples/static
+/the/static/files/ignored    $ echo ignored
+/the/static/files            $ echo ignored
 `
 
 func TestIntegration(t *testing.T) {
@@ -32,6 +34,15 @@ func TestIntegration(t *testing.T) {
 	res, code = hitEndpoint(s, http.MethodGet, "/the/static/files/text", "")
 	assertEqual(t, code, http.StatusOK)
 	assertEqual(t, res, "just some text")
+
+	res, code = hitEndpoint(s, http.MethodGet, "/not/a/real/path", "")
+	assertEqual(t, code, http.StatusNotFound)
+
+	res, code = hitEndpoint(s, http.MethodGet, "/echo/notquite", "")
+	assertEqual(t, code, http.StatusNotFound)
+
+	res, code = hitEndpoint(s, http.MethodGet, "/the/static/files/ignored", "")
+	assertEqual(t, code, http.StatusNotFound)
 }
 
 func initServer(t *testing.T, routefile string) *server.Server {
