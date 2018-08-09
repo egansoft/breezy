@@ -60,7 +60,7 @@ func BenchmarkHandling(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		hitEndpoint(s, http.MethodGet, "/echo/hello/3x", "")
 		hitEndpoint(s, http.MethodPost, "/count/l/grep/y", "y\nn\ny\nn\nn\nn\ny")
-		hitEndpoint(s, http.MethodGet, "/the/static/files/text", "")
+		hitEndpoint(s, http.MethodGet, "/the/static/files/image.png", "")
 		hitEndpoint(s, http.MethodGet, "/not/a/real/path", "")
 		hitEndpoint(s, http.MethodGet, "/error", "")
 	}

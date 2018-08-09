@@ -52,7 +52,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	match := s.router.Match(path)
 
 	bufferDebug(debugBuf, "Match result:\n%v\n\n", match)
-	bufferDebug(debugBuf, "Router tree:\n%s\n\n", s.router.String())
+	bufferDebug(debugBuf, "Router tree:\n%s\n\n", s.router.Serialize())
 
 	if match == nil || match.Action == nil {
 		respondWithError(w, http.StatusNotFound, url)

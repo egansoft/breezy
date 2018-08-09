@@ -10,7 +10,8 @@ import (
 
 // A router is a tree datastructure over url paths
 type Router struct {
-	root Node
+	root   Node
+	serial *string
 }
 
 type Node struct {
@@ -178,6 +179,15 @@ type dfsItem struct {
 	level int
 }
 
+// Serialize is used to return the string representation after constructing the tree, where it is
+// assumed that that the tree structure doesn't change further
+func (r *Router) Serialize() string {
+	if r.serial != nil {
+		return *r.serial
+	}
+	return r.String()
+}
+
 func (r *Router) String() string {
 	starter := &dfsItem{
 		node:  &r.root,
@@ -205,7 +215,10 @@ func (r *Router) String() string {
 			stack = append(stack, next)
 		}
 	}
-	return buffer.String()
+
+	serial := buffer.String()
+	r.serial = &serial
+	return serial
 }
 
 func (u *Node) String() string {
