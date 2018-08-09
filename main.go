@@ -70,7 +70,7 @@ func parseArgs() string {
 
 	config.Port = *port
 	config.DebugMode = *debug
-	config.Shell = *shell
+	config.SetShell(*shell)
 
 	args := flag.Args()
 	if len(args) != 1 {

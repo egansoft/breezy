@@ -49,7 +49,7 @@ func NewCmd(urlPath []string, line string) (Action, error) {
 			return nil, fmt.Errorf("Var %s used in %s but not defined in %v", cmdVar, line, urlPath)
 		}
 
-		varArg := fmt.Sprintf("$%v", varToUrlIndex[cmdVar])
+		varArg := config.ShellBind(varToUrlIndex[cmdVar])
 		script = strings.Replace(script, cmdVar, varArg, -1)
 	}
 
@@ -60,7 +60,7 @@ func NewCmd(urlPath []string, line string) (Action, error) {
 }
 
 func (c *Cmd) Handle(w io.Writer, data io.Reader, args []string, residual []string) (int, error) {
-	bashArgs := []string{"-c", c.script}
+	bashArgs := []string{config.ShellArg, config.ShellPrefix + c.script}
 	allArgs := append(bashArgs, args...)
 
 	inBuf := &bytes.Buffer{}

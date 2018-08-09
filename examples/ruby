@@ -1,0 +1,2 @@
+/say/hello $ puts 'hello'
+/tell/me/[something] $ 10.times do puts [something] end

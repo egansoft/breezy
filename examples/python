@@ -1,0 +1,2 @@
+/say/hello $ print 'hello'
+/tell/me/[something] $ for i in xrange(10): print [something]
