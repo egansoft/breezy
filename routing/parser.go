@@ -18,7 +18,7 @@ const (
 	fsToken  = ":"
 )
 
-var lineRegexp = regexp.MustCompile(`^((/(\w+|\[\w+\]))+)\s+(\$|:)\s+(.+)$`)
+var lineRegexp = regexp.MustCompile(`^((\/(\w+|\[\w+\]))+|\/)\/?\s+(\$|:)\s+(.+)$`)
 
 func Parse(lines []string) (*Router, error) {
 	r := New()

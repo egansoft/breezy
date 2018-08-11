@@ -4,3 +4,4 @@
 /load : examples
 /tell/me/[what] $ echo [what] [what] [what]
 /grep/for/[thing] $ grep [thing]
+/ $ echo Welcome!
