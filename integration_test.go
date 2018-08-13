@@ -20,6 +20,8 @@ const testRoutes = `
 /the/static/files/ignored    $ echo ignored
 /the/static/files            $ echo ignored
 /error                       $ exit 1
+/count/[n]                   $ i=0; while [ $i -lt [n] ]; do echo $i; i=$((i+1)); done
+/                            $ echo welcome
 `
 
 func TestIntegration(t *testing.T) {
@@ -51,6 +53,14 @@ func TestIntegration(t *testing.T) {
 
 	res, code = hitEndpoint(s, http.MethodGet, "/error", "")
 	assertEqual(t, code, http.StatusInternalServerError)
+
+	res, code = hitEndpoint(s, http.MethodGet, "/count/5", "")
+	assertEqual(t, code, http.StatusOK)
+	assertEqual(t, res, "0\n1\n2\n3\n4")
+
+	res, code = hitEndpoint(s, http.MethodGet, "/", "")
+	assertEqual(t, code, http.StatusOK)
+	assertEqual(t, res, "welcome")
 }
 
 func BenchmarkHandling(b *testing.B) {

@@ -4,4 +4,6 @@
 /load : examples
 /tell/me/[what] $ echo [what] [what] [what]
 /grep/for/[thing] $ grep [thing]
+/repeat/[n]/times/[text] $ for i in `seq 1 [n]`; do echo [text]; done;
+/count/[n] $ i=0; while [ $i -lt [n] ]; do echo $i; i=$((i+1)); done
 / $ echo Welcome!

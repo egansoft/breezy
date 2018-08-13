@@ -8,12 +8,13 @@ import (
 	"github.com/egansoft/breezy/utils"
 )
 
-// A router is a tree datastructure over url paths
+// Router defines a tree datastructure over url paths
 type Router struct {
 	root   Node
 	serial *string
 }
 
+// Node is a single chunk of a url path, which is a node in the router tree
 type Node struct {
 	Word     string
 	Type     NodeType
@@ -22,6 +23,7 @@ type Node struct {
 	Children []*Node
 }
 
+// Match is a container for information about a routing path match
 type Match struct {
 	Vars     []string
 	Residual []string
@@ -230,7 +232,7 @@ func (u *Node) String() string {
 	case VarNode:
 		return fmt.Sprintf("/%s", u.Word)
 	case CmdNode:
-		return fmt.Sprintf("$ %s", *u.Payload)
+		return fmt.Sprintf("$ %s", u.Action)
 	case FsNode:
 		return fmt.Sprintf(": %s", *u.Payload)
 	}
