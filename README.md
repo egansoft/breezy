@@ -1,5 +1,25 @@
 # Breezy
-The simplest possible web nano-framework. No code needed.
+Breezy is the simplest possible web nano-framework. No code needed.  
+
+Sometimes all you need from a web server is just
+* Retrieving errors from your logs with a `cat /logs/serverlog | grep ERROR`
+* Restarting a job with a `supervisorctl restart mybigjob`
+* Downloading some static files hosted at output/images
+
+Breezy makes these tasks a breeze. Simply throw this into a text file (like routes.txt):
+
+    /find/errors $ cat /logs/serverlog | grep ERROR
+    /restart/big/job $ supervisorctl restart mybigjob
+    /download : output/images
+
+And run `breezy routes.txt`. You can specify arguments with brackets:
+
+    /find/[needle]/limit/[n] $ cat /logs/serverlog | grep [needle] | head [n]
+    /restart/[name]/job $ supervisorctl restart [name]
+
+You can even pipe POST data into STDIN:
+
+    /upload/[filename] $ cat > uploads/[filename]
 
 ## Usage
     Usage: breezy [OPTIONS] FILE
