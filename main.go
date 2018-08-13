@@ -16,12 +16,12 @@ Run a Breezy server using the routes defined in FILE.
 
 FILE consists of a newline seperated list of routes, which have the forms:
   shell command:
-      /my/url/path $ command to run
+      /say/hello $ echo Hello!
     Args can be specified with brackets:
-      /my/url/[arg1]/path $ command to [arg1] run
+      /say/[msg] $ echo [msg]!
     The request body is piped into stdin.
   filesystem root:
-      /url/path : relative/filesystem/path
+      /resources/url : myfilesystem/static/images
     Static files from the filesystem path are served on the url path, as if the
     filesystem were mounted on the url path.
 
