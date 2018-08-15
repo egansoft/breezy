@@ -44,5 +44,7 @@ If multiple routes match a given URL, then the one that is first in the file is 
 * -d, --debug: enable debug mode, returning information about how the request was handled for every request
 * -h, --help: display the help message
 
+See [examples/](examples) for example route files with different shell options.
+
 ## Security
 Breezy is a simple program, making it really easy to make insecure webservers. Please don't write routes that allow people to execute arbritrary commands on your server, like `/[command] $ [command]`. 
