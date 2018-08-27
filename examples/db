@@ -1,0 +1,4 @@
+/users/create/[id] $ (read data; test -f users/[id].json || echo $data > users/[id].json)
+/users/update/[id] $ (read data; test -f users/[id].json && echo $data > users/[id].json)
+/users/delete/[id] $ rm users/[id].json
+/users/get         : users
