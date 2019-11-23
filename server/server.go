@@ -45,6 +45,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	debugBuf := &bytes.Buffer{}
 	defer flushDebug(debugBuf, w)
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	bufferDebug(debugBuf, "\nYou hit: %s\n\n", r.URL.Path)
 
 	url := r.URL.Path
